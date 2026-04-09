@@ -117,11 +117,16 @@ export async function POST(req: NextRequest) {
     // Validate request origin
     const origin = req.headers.get('origin');
     const allowedOrigins = [
-      process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+      process.env.NEXT_PUBLIC_APP_URL,
       'http://localhost:3000',
-    ];
+      'https://localhost:3000',
+    ].filter(Boolean); // Remove undefined values
     
-    if (origin && !allowedOrigins.includes(origin)) {
+    // In production, allow all Vercel deployments
+    const isVercelDeployment = origin?.includes('.vercel.app');
+    
+    if (origin && !allowedOrigins.includes(origin) && !isVercelDeployment) {
+      console.error('Unauthorized origin:', origin);
       return NextResponse.json(
         { error: 'Unauthorized origin' },
         { status: 401 }
