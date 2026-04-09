@@ -149,6 +149,12 @@ export class DefaultSpeechOutputHandler implements SpeechOutputHandler {
         this.paused = false;
         this.currentUtterance = null;
         
+        // Ignore interrupted errors - they're normal when stopping speech
+        if (event.error === 'interrupted' || event.error === 'canceled') {
+          resolve(); // Treat as successful completion
+          return;
+        }
+        
         const errorMessage = this.getSpeechSynthesisErrorMessage(event.error);
         this.handleError(event.error, errorMessage);
         reject(new Error(errorMessage));
